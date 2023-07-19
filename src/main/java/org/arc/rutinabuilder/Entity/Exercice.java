@@ -1,6 +1,5 @@
 package org.arc.rutinabuilder.Entity;
 
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
@@ -18,10 +17,26 @@ public class Exercice {
     private Integer weight;
     private String collection;
 
+    /**
+     * Default constructor for Exercice.
+     */
     public Exercice() {
     }
 
-    public Exercice(Long id,String name, Integer rep, Integer set, Integer time, String description, Date date, Integer weigth, String collection) {
+    /**
+     * Parameterized constructor for Exercice.
+     *
+     * @param id          The ID of the Exercice object.
+     * @param name        The name of the Exercice.
+     * @param rep         The number of repetitions.
+     * @param set         The number of sets.
+     * @param time        How long the Exercice must be hold.
+     * @param description The description of the Exercice.
+     * @param date        Last day done it.
+     * @param weigth      The weight of the Exercice.
+     * @param collection  The collection to which the Exercice belongs.
+     */
+    public Exercice(Long id, String name, Integer rep, Integer set, Integer time, String description, Date date, Integer weigth, String collection) {
         this.id = id;
         this.name = name;
         this.rep = rep;

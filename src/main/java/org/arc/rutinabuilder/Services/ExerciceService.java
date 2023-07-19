@@ -4,7 +4,6 @@ import org.arc.rutinabuilder.Entity.Counter;
 import org.arc.rutinabuilder.Entity.Exercice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
@@ -16,21 +15,23 @@ public class ExerciceService {
     private MongoTemplate mongoTemplate;
 
     /**
-     * Saves a new exercice object
-     * @param exercice to saved
-     * @param colectionName the collection where to save it
-     * @return and exercice object.
+     * Saves an Exercice object into the specified collection.
+     *
+     * @param exercice      The Exercice object to be saved.
+     * @param colectionName The name of the collection where to save it.
+     * @return The saved Exercice object.
      */
-    public Exercice saveExercice(Exercice exercice, String colectionName){
-        if(exercice.getId()==null){
+    public Exercice saveExercice(Exercice exercice, String colectionName) {
+        if (exercice.getId() == null) {
             exercice.setId(getNextIdForNewObject());
         }
-        return mongoTemplate.save(exercice,colectionName);
+        return mongoTemplate.save(exercice, colectionName);
     }
 
     /**
-     * Takes the id for the next object.
-     * @return a new id
+     * Gets the next ID for a new Exercice object.
+     *
+     * @return A new ID.
      */
     public long getNextIdForNewObject() {
         String collectionName = "counter";
@@ -39,7 +40,7 @@ public class ExerciceService {
 
         if (counter == null) {
             counter = new Counter();
-            counter.setNextId(1); // Valor inicial para nextId
+            counter.setNextId(1); // // Initial value for nextId
             mongoTemplate.save(counter, collectionName);
         } else {
             Update update = new Update().inc("nextId", 1);
