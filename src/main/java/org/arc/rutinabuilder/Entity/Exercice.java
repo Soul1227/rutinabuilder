@@ -2,15 +2,13 @@ package org.arc.rutinabuilder.Entity;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.Date;
 
 @Document
 public class Exercice {
 
-    private ObjectId id;
+    private Long id;
     private String name;
     private Integer rep;
     private Integer set;
@@ -23,7 +21,7 @@ public class Exercice {
     public Exercice() {
     }
 
-    public Exercice(ObjectId id,String name, Integer rep, Integer set, Integer time, String description, Date date, Integer weigth, String collection) {
+    public Exercice(Long id,String name, Integer rep, Integer set, Integer time, String description, Date date, Integer weigth, String collection) {
         this.id = id;
         this.name = name;
         this.rep = rep;
@@ -91,11 +89,11 @@ public class Exercice {
         this.weight = weigth;
     }
 
-    public ObjectId getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(ObjectId id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -110,7 +108,7 @@ public class Exercice {
     @Override
     public String toString() {
         return "Exercice{" +
-                "id=" + id.toHexString() +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", rep=" + rep +
                 ", set=" + set +
