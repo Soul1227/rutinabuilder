@@ -1,16 +1,13 @@
 package org.arc.rutinabuilder.Entity;
 
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.Date;
 
 @Document
 public class Exercice {
 
-    private ObjectId id;
+    private Long id;
     private String name;
     private Integer rep;
     private Integer set;
@@ -20,10 +17,26 @@ public class Exercice {
     private Integer weight;
     private String collection;
 
+    /**
+     * Default constructor for Exercice.
+     */
     public Exercice() {
     }
 
-    public Exercice(ObjectId id,String name, Integer rep, Integer set, Integer time, String description, Date date, Integer weigth, String collection) {
+    /**
+     * Parameterized constructor for Exercice.
+     *
+     * @param id          The ID of the Exercice object.
+     * @param name        The name of the Exercice.
+     * @param rep         The number of repetitions.
+     * @param set         The number of sets.
+     * @param time        How long the Exercice must be hold.
+     * @param description The description of the Exercice.
+     * @param date        Last day done it.
+     * @param weigth      The weight of the Exercice.
+     * @param collection  The collection to which the Exercice belongs.
+     */
+    public Exercice(Long id, String name, Integer rep, Integer set, Integer time, String description, Date date, Integer weigth, String collection) {
         this.id = id;
         this.name = name;
         this.rep = rep;
@@ -91,11 +104,11 @@ public class Exercice {
         this.weight = weigth;
     }
 
-    public ObjectId getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(ObjectId id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -110,7 +123,7 @@ public class Exercice {
     @Override
     public String toString() {
         return "Exercice{" +
-                "id=" + id.toHexString() +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", rep=" + rep +
                 ", set=" + set +
