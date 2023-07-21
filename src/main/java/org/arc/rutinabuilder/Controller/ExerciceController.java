@@ -22,9 +22,15 @@ public class ExerciceController {
     public Exercice saveExercice(@RequestBody Exercice exercice) {
         return exerciceService.saveExercice(exercice, exercice.getCollection());
     }
-/**
- @GetMapping("/exercice/{id}") public Exercice findById(@PathVariable("id") String id) {
 
- }
- */
+    /**
+     * Updates an Exercice Object received in the request body.
+     *
+     * @param exercice The Exercice object to be updated.
+     * @return The Exercice object updated.
+     */
+    @PutMapping("/exercice")
+    public Exercice updateExercice(@RequestBody Exercice exercice) {
+        return exerciceService.updateExercice(exercice);
+    }
 }
