@@ -20,7 +20,7 @@ public class ExerciceController {
      */
     @PostMapping("/exercice")
     public Exercice saveExercice(@RequestBody Exercice exercice) {
-        return exerciceService.saveExercice(exercice, exercice.getCollection());
+        return exerciceService.saveExercice(exercice);
     }
 
     /**

@@ -1,7 +1,12 @@
 package org.arc.rutinabuilder.Services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import org.arc.rutinabuilder.Entity.Counter;
 import org.arc.rutinabuilder.Entity.Exercice;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -9,8 +14,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class ExerciceService {
@@ -21,15 +27,14 @@ public class ExerciceService {
     /**
      * Saves an Exercice object into the specified collection.
      *
-     * @param exercice      The Exercice object to be saved.
-     * @param colectionName The name of the collection where to save it.
+     * @param exercice The Exercice object to be saved.
      * @return The saved Exercice object.
      */
-    public Exercice saveExercice(Exercice exercice, String colectionName) {
+    public Exercice saveExercice(Exercice exercice) {
         if (exercice.getId() == null) {
             exercice.setId(getNextIdForNewObject());
         }
-        return mongoTemplate.save(exercice, colectionName);
+        return mongoTemplate.save(exercice, exercice.getCollection());
     }
 
     /**
@@ -60,17 +65,11 @@ public class ExerciceService {
      * @return the object updated
      */
     public Exercice updateExercice(Exercice exercice) {
-        Exercice exerciceDB = findOneById(exercice.getId(), exercice.getCollection());
-        try {
-            exercicePooring(exerciceDB, exercice);
-        }catch (IllegalAccessException ex){
-            System.out.println(ex.getMessage());
-        }
-        return mongoTemplate.save(exerciceDB,exerciceDB.getCollection());
+        return mongoTemplate.save(exercice, exercice.getCollection());
     }
 
     /**
-     * Find an Exercice from the DB based on its id and collection.
+     * Find an Exercice from the DB, based on its id and collection.
      *
      * @param id             of the exercice object to find
      * @param collectionName where the object is
@@ -82,25 +81,63 @@ public class ExerciceService {
     }
 
     /**
+     * Removes an exercice from the database.
      *
-     * @param exerciceDB
-     * @param exerciceUpdated
-     * @return
-     * @throws IllegalAccessException
+     * @param exercice to be deleted.
+     * @return true if it was deleted, false if it was not.
      */
-    public Exercice exercicePooring(Exercice exerciceDB, Exercice exerciceUpdated) throws IllegalAccessException {
-        Class<?> exerciceClass = Exercice.class;
-        java.lang.reflect.Field[] fields = exerciceClass.getDeclaredFields();
+    public boolean deleteExercice(Exercice exercice) {
+        Query query = new Query(Criteria.where("id").is(exercice.getId()));
+        mongoTemplate.remove(query, Exercice.class, exercice.getCollection());
+        return findOneById(exercice.getId(), exercice.getCollection()) == null;
+    }
 
-        for (Field field : fields) {
-            field.setAccessible(true);
-            Object valueDB = field.get(exerciceDB);
-            Object valueUpdated = field.get(exerciceUpdated);
+    /**
+     * This method retrieves a Set of String objects representing the names of all the collections present in the MongoDB database.
+     *
+     * @return A Set of String containing the names of all the collections in the database.
+     */
+    public Set<String> getAllCollectionNames() {
+        return mongoTemplate.getCollectionNames();
+    }
 
-            if (!Objects.equals(valueDB, valueUpdated)) {
-                field.set(exerciceDB, valueUpdated);
+    /**
+     * Retrive the BSON documents from a specific collection.
+     *
+     * @param collectionName the name of the collection.
+     * @return a list of BSON documents.
+     */
+    public List<Document> getAllExerciceDocuments(String collectionName) {
+        MongoCollection<Document> collection = mongoTemplate.getCollection(collectionName);
+        List<Document> documents = new ArrayList<>();
+
+        FindIterable<Document> findIterable = collection.find();
+        findIterable.forEach(documents::add);
+
+        return documents;
+    }
+
+    /**
+     * Converts a list of BSON documents to JSON objects.
+     *
+     * @param bsonDocuments a list of BSON documents
+     * @return a list of documents in JSON format
+     */
+    public List<String> convertToJSON(List<Document> bsonDocuments) {
+        List<String> jsonDocuments = new ArrayList<>();
+
+        // Convierte cada documento BSON a JSON utilizando Jackson ObjectMapper
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (Document doc : bsonDocuments) {
+            try {
+                String jsonDocument = objectMapper.writeValueAsString(doc);
+                jsonDocuments.add(jsonDocument);
+            } catch (JsonProcessingException e) {
+                // Manejo de errores en caso de que ocurra una excepción al convertir a JSON
+                e.printStackTrace();
             }
         }
-        return exerciceDB;
+        return jsonDocuments;
     }
+
 }
