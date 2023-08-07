@@ -30,11 +30,17 @@ public class ExerciceService {
      * @param exercice The Exercice object to be saved.
      * @return The saved Exercice object.
      */
-    public Exercice saveExercice(Exercice exercice) {
+    public boolean saveExercice(Exercice exercice) {
         if (exercice.getId() == null) {
             exercice.setId(getNextIdForNewObject());
         }
-        return mongoTemplate.save(exercice, exercice.getCollection());
+        try {
+            mongoTemplate.save(exercice, exercice.getCollection());
+            return true;
+        } catch (Exception e) {
+            //Añadir Log
+            return false;
+        }
     }
 
     /**
@@ -64,8 +70,13 @@ public class ExerciceService {
      * @param exercice the object to update
      * @return the object updated
      */
-    public Exercice updateExercice(Exercice exercice) {
-        return mongoTemplate.save(exercice, exercice.getCollection());
+    public boolean updateExercice(Exercice exercice) {
+        try {
+            saveExercice(exercice);
+            return true; // Actualización exitosa
+        } catch (Exception e) {
+            return false; // Error en la actualización
+        }
     }
 
     /**
@@ -83,13 +94,14 @@ public class ExerciceService {
     /**
      * Removes an exercice from the database.
      *
-     * @param exercice to be deleted.
+     * @param id             of the Exercice to be deleted.
+     * @param CollectionName of the Exercice to be deleted.
      * @return true if it was deleted, false if it was not.
      */
-    public boolean deleteExercice(Exercice exercice) {
-        Query query = new Query(Criteria.where("id").is(exercice.getId()));
-        mongoTemplate.remove(query, Exercice.class, exercice.getCollection());
-        return findOneById(exercice.getId(), exercice.getCollection()) == null;
+    public boolean deleteExercice(long id, String CollectionName) {
+        Query query = new Query(Criteria.where("id").is(id));
+        mongoTemplate.remove(query, Exercice.class, CollectionName);
+        return findOneById(id, CollectionName) == null;
     }
 
     /**
