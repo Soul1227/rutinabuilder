@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.DeleteResult;
 import org.arc.rutinabuilder.Entity.Counter;
 import org.arc.rutinabuilder.Entity.Exercice;
 import org.bson.Document;
@@ -23,6 +24,13 @@ public class ExerciceService {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    public ExerciceService(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
+
+    public ExerciceService() {
+    }
 
     /**
      * Saves an Exercice object into the specified collection.
@@ -88,7 +96,12 @@ public class ExerciceService {
      */
     public Exercice findOneById(Long id, String collectionName) {
         Query query = new Query(Criteria.where("id").is(id));
-        return mongoTemplate.findOne(query, Exercice.class, collectionName);
+        try {
+            return mongoTemplate.findOne(query, Exercice.class, collectionName);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return null;
+        }
     }
 
     /**
@@ -100,8 +113,12 @@ public class ExerciceService {
      */
     public boolean deleteExercice(long id, String CollectionName) {
         Query query = new Query(Criteria.where("id").is(id));
-        mongoTemplate.remove(query, Exercice.class, CollectionName);
-        return findOneById(id, CollectionName) == null;
+        try {
+            DeleteResult result = mongoTemplate.remove(query, Exercice.class, CollectionName);
+            return result.wasAcknowledged();
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     /**
@@ -120,8 +137,11 @@ public class ExerciceService {
      * @return a list of BSON documents.
      */
     public List<Document> getAllExerciceDocuments(String collectionName) {
-        MongoCollection<Document> collection = mongoTemplate.getCollection(collectionName);
         List<Document> documents = new ArrayList<>();
+        if (collectionName == null) {
+            return documents;
+        }
+        MongoCollection<Document> collection = mongoTemplate.getCollection(collectionName);
 
         FindIterable<Document> findIterable = collection.find();
         findIterable.forEach(documents::add);
@@ -137,7 +157,9 @@ public class ExerciceService {
      */
     public List<String> convertToJSON(List<Document> bsonDocuments) {
         List<String> jsonDocuments = new ArrayList<>();
-
+        if (bsonDocuments == null) {
+            return jsonDocuments;
+        }
         // Convierte cada documento BSON a JSON utilizando Jackson ObjectMapper
         ObjectMapper objectMapper = new ObjectMapper();
         for (Document doc : bsonDocuments) {
@@ -151,5 +173,4 @@ public class ExerciceService {
         }
         return jsonDocuments;
     }
-
 }
