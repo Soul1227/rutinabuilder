@@ -3,6 +3,8 @@ package org.arc.rutinabuilder.Controller;
 import org.arc.rutinabuilder.Entity.Exercice;
 import org.arc.rutinabuilder.Services.ExerciceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -12,6 +14,10 @@ public class ExerciceController {
     @Autowired
     ExerciceService exerciceService;
 
+    public ExerciceController(ExerciceService exerciceService){
+        this.exerciceService = exerciceService;
+    }
+
     /**
      * Saves an Exercice object received in the request body.
      *
@@ -19,8 +25,12 @@ public class ExerciceController {
      * @return The saved Exercice object.
      */
     @PostMapping("/exercice")
-    public Exercice saveExercice(@RequestBody Exercice exercice) {
-        return exerciceService.saveExercice(exercice);
+    public ResponseEntity<Exercice> saveExercice(@RequestBody Exercice exercice) {
+        if(exerciceService.saveExercice(exercice)){
+            return ResponseEntity.status(HttpStatus.CREATED).body(exercice);
+        }else{
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**
@@ -30,7 +40,11 @@ public class ExerciceController {
      * @return The Exercice object updated.
      */
     @PutMapping("/exercice")
-    public Exercice updateExercice(@RequestBody Exercice exercice) {
-        return exerciceService.updateExercice(exercice);
+    public ResponseEntity<Exercice> updateExercice(@RequestBody Exercice exercice) {
+        if(exerciceService.updateExercice(exercice)){
+            return ResponseEntity.status(HttpStatus.OK).body(exercice);
+        }else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

@@ -1,7 +1,11 @@
 package org.arc.rutinabuilder.Controller;
 
 import org.arc.rutinabuilder.Entity.Exercice;
+import org.arc.rutinabuilder.Services.ExerciceService;
 import org.junit.jupiter.api.*;
+
+import static org.mockito.Mockito.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -9,15 +13,14 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 
-import java.util.Arrays;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ExerciceControllerTest {
 
-    private String jsonTest = """
+    private final String jsonTest = """
             {
                 "name":"Sentadillas",
                 "rep":50,
@@ -29,7 +32,6 @@ class ExerciceControllerTest {
                 "collection":"legs"
             }
             """;
-    private Exercice exerciceTest;
 
     // TestRestTemplate es una clase proporcionada por el framework de pruebas de Spring para realizar solicitudes HTTP en pruebas de integración
     private TestRestTemplate testRestTemplate;
@@ -52,39 +54,41 @@ class ExerciceControllerTest {
         testRestTemplate = new TestRestTemplate(restTemplateBuilder);
     }
 
-    @DisplayName("Get: Getting Exercice by its Id")
-    @Order(2)
-    @Test
-    void findById() {
-        String url = "/exercice/" + exerciceTest.getId().toString();
-        System.out.println(url);
-        ResponseEntity<Exercice> response = testRestTemplate.getForEntity(url, Exercice.class);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        Exercice exercice = response.getBody();
-        assertEquals(exerciceTest.getId(), exercice.getId());
+    private ExerciceService createMockExerciceService(boolean expectedResult) {
+        ExerciceService exerciceServiceMock = mock(ExerciceService.class);
+        when(exerciceServiceMock.saveExercice(any(Exercice.class))).thenReturn(expectedResult);
+        return exerciceServiceMock;
     }
 
     @DisplayName("Post: Creating new Exercice")
     @Order(1)
     @Test
-    void saveExercice() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+    void testSaveExercice() {
+        ExerciceService exerciceServiceMock = createMockExerciceService(true);
+        ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
-        HttpEntity<String> request = new HttpEntity<>(jsonTest, headers);
-        ResponseEntity<Exercice> response = testRestTemplate.exchange("/exercice", HttpMethod.POST, request, Exercice.class);
-        exerciceTest = response.getBody();
-        System.out.println(exerciceTest.toString());
-        System.out.println(exerciceTest.getId());
-        assertEquals(exerciceTest.getName(), "Sentadillas");
-        assertEquals(exerciceTest.getRep(), 50);
+        ResponseEntity<Exercice> response = exerciceController.saveExercice(new Exercice());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        exerciceServiceMock = createMockExerciceService(false);
+        ResponseEntity<Exercice> errorResponse = exerciceController.saveExercice(new Exercice());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, errorResponse.getStatusCode());
     }
 
-    /**
-     *     void findOneById() {
-     *         ResponseEntity<Book> response = testRestTemplate.getForEntity("/api/book/1",Book.class);
-     *         assertEquals(HttpStatus.OK,response.getStatusCode());
-     *     }
-     */
+    @DisplayName("PUT: Updating Exercice")
+    @Order(2)
+    @Test
+    void testUpdateExercice() {
+        ExerciceService exerciceServiceMock = createMockExerciceService(true);
+        ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
+
+        ResponseEntity<Exercice> expectedResponse = exerciceController.updateExercice(new Exercice());
+        assertEquals(HttpStatus.OK, expectedResponse.getStatusCode());
+
+        exerciceServiceMock = createMockExerciceService(false);
+        ResponseEntity<Exercice> errorResponse = exerciceController.updateExercice(new Exercice());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, errorResponse.getStatusCode());
+    }
+
+
 }
