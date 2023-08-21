@@ -14,7 +14,7 @@ public class ExerciceController {
     @Autowired
     ExerciceService exerciceService;
 
-    public ExerciceController(ExerciceService exerciceService){
+    public ExerciceController(ExerciceService exerciceService) {
         this.exerciceService = exerciceService;
     }
 
@@ -26,9 +26,9 @@ public class ExerciceController {
      */
     @PostMapping("/exercice")
     public ResponseEntity<Exercice> saveExercice(@RequestBody Exercice exercice) {
-        if(exerciceService.saveExercice(exercice)){
+        if (exerciceService.saveExercice(exercice)) {
             return ResponseEntity.status(HttpStatus.CREATED).body(exercice);
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -41,9 +41,9 @@ public class ExerciceController {
      */
     @PutMapping("/exercice")
     public ResponseEntity<Exercice> updateExercice(@RequestBody Exercice exercice) {
-        if(exerciceService.updateExercice(exercice)){
+        if (exerciceService.updateExercice(exercice)) {
             return ResponseEntity.status(HttpStatus.OK).body(exercice);
-        }else {
+        } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
