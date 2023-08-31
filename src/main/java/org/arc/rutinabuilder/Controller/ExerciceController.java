@@ -47,4 +47,10 @@ public class ExerciceController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @DeleteMapping("/exercice")
+    public ResponseEntity<Exercice> deleteExercice (@RequestBody Exercice exercice){
+        
+    }
+
 }

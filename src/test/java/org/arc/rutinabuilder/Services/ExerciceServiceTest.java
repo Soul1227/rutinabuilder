@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ExerciceServiceTest {
-    Exercice exerciceTest = new Exercice(4L, "test", 50, 3, null, "test", Date.valueOf(LocalDate.now()), 50, "test");
+    Exercice exerciceTest = new Exercice(4L, "test", 50, 3, null, "test", Date.valueOf(LocalDate.now()), true, 50, "test");
     MongoTemplate mongoTemplateMock = mock(MongoTemplate.class);
     ExerciceService exerciceService = new ExerciceService(mongoTemplateMock);
     ExerciceService exerciceServiceMock = mock(ExerciceService.class);

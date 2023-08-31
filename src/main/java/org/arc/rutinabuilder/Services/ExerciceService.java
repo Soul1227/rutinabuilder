@@ -42,6 +42,13 @@ public class ExerciceService {
         if (exercice.getId() == null) {
             exercice.setId(getNextIdForNewObject());
         }
+        /*
+          If the exercice come with the param "done" as true, "_done" is added to his collection name.
+          so it will be saved in a different collection.
+         */
+        if(exercice.getDone()){
+            exercice.setCollection(exercice.getCollection()+"_done");
+        }
         try {
             mongoTemplate.save(exercice, exercice.getCollection());
             return true;
