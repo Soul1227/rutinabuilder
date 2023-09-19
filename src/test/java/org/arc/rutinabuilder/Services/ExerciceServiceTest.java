@@ -3,9 +3,6 @@ package org.arc.rutinabuilder.Services;
 import com.mongodb.client.result.DeleteResult;
 import org.arc.rutinabuilder.Entity.Counter;
 import org.arc.rutinabuilder.Entity.Exercice;
-import org.bson.BsonDocument;
-import org.bson.BsonElement;
-import org.bson.BsonValue;
 import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -176,23 +173,23 @@ class ExerciceServiceTest {
     @DisplayName("getAllExerciceDocuments_EmptyList")
     @Test
     void getAllExerciceDocuments_empty() {
-        List<Document> emptyList = new ArrayList<>();
-        when(exerciceServiceMock.getAllExerciceDocuments("legs")).thenReturn(emptyList);
+        List<Exercice> emptyList = new ArrayList<>();
+        when(exerciceServiceMock.getAllExerciceOfOneType("legs")).thenReturn(emptyList);
 
-        List<Document> list = exerciceServiceMock.getAllExerciceDocuments("legs");
+        List<Exercice> list = exerciceServiceMock.getAllExerciceOfOneType("legs");
         assertTrue(list.isEmpty());
     }
 
     @DisplayName("getAllExerciceDocuments_EmptyList")
     @Test
     void getAllExerciceDocuments_filled() {
-        Document document1 = new Document();
-        Document document2 = new Document();
-        Document document3 = new Document();
-        List<Document> filledList = Arrays.asList(document1, document2, document3);
-        when(exerciceServiceMock.getAllExerciceDocuments("legs")).thenReturn(filledList);
+        Exercice document1 = new Exercice();
+        Exercice document2 = new Exercice();
+        Exercice document3 = new Exercice();
+        List<Exercice> filledList = Arrays.asList(document1, document2, document3);
+        when(exerciceServiceMock.getAllExerciceOfOneType("legs")).thenReturn(filledList);
 
-        List<Document> list = exerciceServiceMock.getAllExerciceDocuments("legs");
+        List<Exercice> list = exerciceServiceMock.getAllExerciceOfOneType("legs");
         assertFalse(list.isEmpty());
         assertEquals(filledList.size(), list.size());
         assertTrue(list.containsAll(filledList));
