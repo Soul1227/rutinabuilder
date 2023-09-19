@@ -2,13 +2,12 @@ package org.arc.rutinabuilder.Services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.DeleteResult;
 import org.arc.rutinabuilder.Entity.Counter;
 import org.arc.rutinabuilder.Entity.Exercice;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -46,8 +45,10 @@ public class ExerciceService {
           If the exercice come with the param "done" as true, "_done" is added to his collection name.
           so it will be saved in a different collection.
          */
-        if(exercice.getDone()){
-            exercice.setCollection(exercice.getCollection()+"_done");
+        if (exercice.getDone()) {
+            exercice.setCollection(exercice.getCollection() + "_done");
+        } else {
+            exercice.setCollection(exercice.getCollection() + "_guide");
         }
         try {
             mongoTemplate.save(exercice, exercice.getCollection());
@@ -129,6 +130,22 @@ public class ExerciceService {
     }
 
     /**
+     * Deletes all the exercice done for the exercice name given.
+     *
+     * @param name           of the Exercice to be deleted.
+     * @param CollectionName of the Exercice to be deleted.
+     */
+    public boolean deleteAllExerciceDone(String name, String CollectionName) {
+        Query query = new Query(Criteria.where("name").is(name));
+        try {
+            DeleteResult result = mongoTemplate.remove(query, Exercice.class, CollectionName);
+            return result.wasAcknowledged();
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    /**
      * This method retrieves a Set of String objects representing the names of all the collections present in the MongoDB database.
      *
      * @return A Set of String containing the names of all the collections in the database.
@@ -138,22 +155,26 @@ public class ExerciceService {
     }
 
     /**
-     * Retrive the BSON documents from a specific collection.
+     * Retrieves the Exercice from a specific collection.
      *
      * @param collectionName the name of the collection.
-     * @return a list of BSON documents.
+     * @return a list of Exercice.
      */
-    public List<Document> getAllExerciceDocuments(String collectionName) {
-        List<Document> documents = new ArrayList<>();
-        if (collectionName == null) {
-            return documents;
-        }
-        MongoCollection<Document> collection = mongoTemplate.getCollection(collectionName);
+    public List<Exercice> getAllExerciceOfOneType(String collectionName) {
+        return mongoTemplate.findAll(Exercice.class, collectionName);
+    }
 
-        FindIterable<Document> findIterable = collection.find();
-        findIterable.forEach(documents::add);
-
-        return documents;
+    /**
+     * Retrieves all exercice done in one collection under a specific name.
+     *
+     * @param exerciceName   the name of the exercice.
+     * @param collectionName the name of the collection where to look at.
+     * @return a list of Exercice.
+     */
+    public List<Exercice> getAllExercicesDoneOfOneType(String exerciceName, String collectionName) {
+        Query query = new Query(Criteria.where("name").is(exerciceName));
+        query.with(Sort.by(Sort.Order.asc("date")));
+        return mongoTemplate.find(query, Exercice.class, collectionName);
     }
 
     /**
