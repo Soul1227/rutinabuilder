@@ -1,6 +1,6 @@
 package org.arc.rutinabuilder.Controller;
 
-import org.arc.rutinabuilder.Entity.Exercice;
+import org.arc.rutinabuilder.Entity.Exercise;
 import org.arc.rutinabuilder.Services.ExerciceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,14 +27,37 @@ public class ExerciceController {
      * @return The saved Exercice object.
      */
     @PostMapping("/exercice")
-    public ResponseEntity<Exercice> saveExercice(@RequestBody Exercice exercice) {
+    public ResponseEntity<Exercise> saveExercice(@RequestBody Exercise exercice) {
         if (exerciceService.saveExercice(exercice)) {
             return ResponseEntity.status(HttpStatus.CREATED).body(exercice);
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    /**
+    @PostMapping("/exercice")
+    public ResponseEntity saveExercice(@RequestBody Exercise exercice) {
+        try {
+            if(exercice == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); //No es un ejercicio
 
+            exercice.setId(getNextIdForNewObject());
+
+            if (exercice.getDone()) {
+                exercice.setCollection(exercice.getCollection() + "_done");
+            } else {
+                exercice.setCollection(exercice.getCollection() + "_guide");
+            }
+
+            Exercise newExercise = mongoTemplate.save(exercice, exercice.getCollection());
+            if (newExercise == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); //Error al guardar el ejercicio
+
+            return ResponseEntity.status(HttpStatus.OK).body(exercice);
+
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()); // e.message (mensaje de la excepcion)
+        }
+    }
+*/
     /**
      * Updates an Exercice Object received in the request body.
      *
@@ -42,7 +65,7 @@ public class ExerciceController {
      * @return The Exercice object updated.
      */
     @PutMapping("/exercice")
-    public ResponseEntity<Exercice> updateExercice(@RequestBody Exercice exercice) {
+    public ResponseEntity<Exercise> updateExercice(@RequestBody Exercise exercice) {
         if (exerciceService.updateExercice(exercice)) {
             return ResponseEntity.status(HttpStatus.OK).body(exercice);
         } else {
@@ -57,7 +80,7 @@ public class ExerciceController {
      * @return
      */
     @DeleteMapping("/exercice")
-    public ResponseEntity<Exercice> deleteExercice(@RequestBody Exercice exercice) {
+    public ResponseEntity<Exercise> deleteExercice(@RequestBody Exercise exercice) {
         if (exerciceService.deleteExercice(exercice.getId(), exercice.getCollection()) && exerciceService.deleteAllExerciceDone(exercice.getName(), exercice.getCollection())) {
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
@@ -74,7 +97,7 @@ public class ExerciceController {
      * @return A list of BSON documents representing the Exercices.
      */
     @GetMapping("/exercices")
-    public ResponseEntity<List<Exercice>> getAllExerciceOfOneMuscle(@RequestParam String muscle) {
+    public ResponseEntity<List<Exercise>> getAllExerciceOfOneMuscle(@RequestParam String muscle) {
         try {
             if (muscle.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             return ResponseEntity.status(HttpStatus.OK).body(exerciceService.getAllExerciceOfOneType(muscle));
@@ -92,7 +115,7 @@ public class ExerciceController {
      * @return A list of Exercices performed.
      */
     @GetMapping("/allExercicesDone")
-    public ResponseEntity<List<Exercice>> getAllExercicesDoneOfOneType(@RequestParam String collectionName, String exerciceName) {
+    public ResponseEntity<List<Exercise>> getAllExercicesDoneOfOneType(@RequestParam String collectionName, String exerciceName) {
         try {
             if (collectionName.isEmpty() || exerciceName.isEmpty())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -102,7 +125,7 @@ public class ExerciceController {
         }
     }
 /**
- @GetMapping("/routine") public ResponseEntity<List<Document>> createRoutine(@RequestBody int numberOfWeeks, int numberOfDaysPerWeek, int numberOfExercisesPerDay){
+n @GetMapping("/routine") public ResponseEntity<List<Documet>> createRoutine(@RequestBody int numberOfWeeks, int numberOfDaysPerWeek, int numberOfExercisesPerDay){
 
 
  }

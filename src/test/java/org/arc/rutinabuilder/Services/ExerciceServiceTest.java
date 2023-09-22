@@ -2,7 +2,7 @@ package org.arc.rutinabuilder.Services;
 
 import com.mongodb.client.result.DeleteResult;
 import org.arc.rutinabuilder.Entity.Counter;
-import org.arc.rutinabuilder.Entity.Exercice;
+import org.arc.rutinabuilder.Entity.Exercise;
 import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ExerciceServiceTest {
-    Exercice exerciceTest = new Exercice(4L, "test", 50, 3, null, "test", Date.valueOf(LocalDate.now()), true, 50, "test");
+    Exercise exerciceTest = new Exercise(4L, "test", 50, 3, null, "test", Date.valueOf(LocalDate.now()), true, 50, "test");
     MongoTemplate mongoTemplateMock = mock(MongoTemplate.class);
     ExerciceService exerciceService = new ExerciceService(mongoTemplateMock);
     ExerciceService exerciceServiceMock = mock(ExerciceService.class);
@@ -101,9 +101,9 @@ class ExerciceServiceTest {
     @Test
     void findOneById_Success() {
         Query query = new Query(Criteria.where("id").is(exerciceTest.getId()));
-        when(mongoTemplateMock.findOne(query, Exercice.class, exerciceTest.getCollection())).thenReturn(exerciceTest);
+        when(mongoTemplateMock.findOne(query, Exercise.class, exerciceTest.getCollection())).thenReturn(exerciceTest);
 
-        Exercice exercice = exerciceService.findOneById(exerciceTest.getId(), exerciceTest.getCollection());
+        Exercise exercice = exerciceService.findOneById(exerciceTest.getId(), exerciceTest.getCollection());
 
         assertEquals(exerciceTest, exercice);
     }
@@ -112,9 +112,9 @@ class ExerciceServiceTest {
     @Test
     void findOneById_Failure() {
         Query query = new Query(Criteria.where("id").is(exerciceTest.getId()));
-        when(mongoTemplateMock.find(query, Exercice.class, exerciceTest.getCollection())).thenReturn(null);
+        when(mongoTemplateMock.find(query, Exercise.class, exerciceTest.getCollection())).thenReturn(null);
 
-        Exercice exercice = exerciceService.findOneById(exerciceTest.getId(), exerciceTest.getCollection());
+        Exercise exercice = exerciceService.findOneById(exerciceTest.getId(), exerciceTest.getCollection());
 
         assertNull(exercice);
     }
@@ -123,7 +123,7 @@ class ExerciceServiceTest {
     @Test
     void deleteExercice_Success() {
         Query query = new Query(Criteria.where("id").is(exerciceTest.getId()));
-        when(mongoTemplateMock.remove(query, Exercice.class, exerciceTest.getCollection())).thenReturn(new DeleteResult() {
+        when(mongoTemplateMock.remove(query, Exercise.class, exerciceTest.getCollection())).thenReturn(new DeleteResult() {
             @Override
             public boolean wasAcknowledged() {
                 return true;
@@ -137,14 +137,14 @@ class ExerciceServiceTest {
 
         Boolean result = exerciceService.deleteExercice(exerciceTest.getId(), exerciceTest.getCollection());
         assertTrue(result);
-        verify(mongoTemplateMock).remove(query, Exercice.class, exerciceTest.getCollection());
+        verify(mongoTemplateMock).remove(query, Exercise.class, exerciceTest.getCollection());
     }
 
     @DisplayName("deleteExercice_Failure")
     @Test
     void deleteExercice_Failure() {
         Query query = new Query(Criteria.where("id").is(exerciceTest.getId()));
-        when(mongoTemplateMock.remove(query, Exercice.class, exerciceTest.getCollection())).thenReturn(new DeleteResult() {
+        when(mongoTemplateMock.remove(query, Exercise.class, exerciceTest.getCollection())).thenReturn(new DeleteResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -158,7 +158,7 @@ class ExerciceServiceTest {
 
         boolean result = exerciceService.deleteExercice(exerciceTest.getId(), exerciceTest.getCollection());
         assertFalse(result);
-        verify(mongoTemplateMock).remove(query, Exercice.class, exerciceTest.getCollection());
+        verify(mongoTemplateMock).remove(query, Exercise.class, exerciceTest.getCollection());
     }
 
     @DisplayName("getAllCollectionNames")
@@ -173,23 +173,23 @@ class ExerciceServiceTest {
     @DisplayName("getAllExerciceDocuments_EmptyList")
     @Test
     void getAllExerciceDocuments_empty() {
-        List<Exercice> emptyList = new ArrayList<>();
+        List<Exercise> emptyList = new ArrayList<>();
         when(exerciceServiceMock.getAllExerciceOfOneType("legs")).thenReturn(emptyList);
 
-        List<Exercice> list = exerciceServiceMock.getAllExerciceOfOneType("legs");
+        List<Exercise> list = exerciceServiceMock.getAllExerciceOfOneType("legs");
         assertTrue(list.isEmpty());
     }
 
     @DisplayName("getAllExerciceDocuments_EmptyList")
     @Test
     void getAllExerciceDocuments_filled() {
-        Exercice document1 = new Exercice();
-        Exercice document2 = new Exercice();
-        Exercice document3 = new Exercice();
-        List<Exercice> filledList = Arrays.asList(document1, document2, document3);
+        Exercise document1 = new Exercise();
+        Exercise document2 = new Exercise();
+        Exercise document3 = new Exercise();
+        List<Exercise> filledList = Arrays.asList(document1, document2, document3);
         when(exerciceServiceMock.getAllExerciceOfOneType("legs")).thenReturn(filledList);
 
-        List<Exercice> list = exerciceServiceMock.getAllExerciceOfOneType("legs");
+        List<Exercise> list = exerciceServiceMock.getAllExerciceOfOneType("legs");
         assertFalse(list.isEmpty());
         assertEquals(filledList.size(), list.size());
         assertTrue(list.containsAll(filledList));
