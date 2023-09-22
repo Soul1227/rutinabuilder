@@ -1,6 +1,6 @@
 package org.arc.rutinabuilder.Controller;
 
-import org.arc.rutinabuilder.Entity.Exercice;
+import org.arc.rutinabuilder.Entity.Exercise;
 import org.arc.rutinabuilder.Services.ExerciceService;
 import org.junit.jupiter.api.*;
 
@@ -22,30 +22,30 @@ class ExerciceControllerTest {
     @DisplayName("Post: Creating new Exercice")
     @Test
     void testSaveExercice_Created() {
-        when(exerciceServiceMock.saveExercice(any(Exercice.class))).thenReturn(true);
+        when(exerciceServiceMock.saveExercice(any(Exercise.class))).thenReturn(true);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
-        ResponseEntity<Exercice> response = exerciceController.saveExercice(new Exercice());
+        ResponseEntity<Exercise> response = exerciceController.saveExercice(new Exercise());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
     @DisplayName("Post: Creating new Exercice")
     @Test
     void testSaveExercice_Error() {
-        when(exerciceServiceMock.saveExercice(any(Exercice.class))).thenReturn(false);
+        when(exerciceServiceMock.saveExercice(any(Exercise.class))).thenReturn(false);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
-        ResponseEntity<Exercice> errorResponse = exerciceController.saveExercice(new Exercice());
+        ResponseEntity<Exercise> errorResponse = exerciceController.saveExercice(new Exercise());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, errorResponse.getStatusCode());
     }
 
     @DisplayName("Put: Updating Exercice")
     @Test
     void testUpdateExercice_OK() {
-        when(exerciceServiceMock.updateExercice(any(Exercice.class))).thenReturn(true);
+        when(exerciceServiceMock.updateExercice(any(Exercise.class))).thenReturn(true);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
-        ResponseEntity<Exercice> expectedResponse = exerciceController.updateExercice(new Exercice());
+        ResponseEntity<Exercise> expectedResponse = exerciceController.updateExercice(new Exercise());
         assertEquals(HttpStatus.OK, expectedResponse.getStatusCode());
 
     }
@@ -53,10 +53,10 @@ class ExerciceControllerTest {
     @DisplayName("Put: Updating Exercice")
     @Test
     void testUpdateExercice_Error() {
-        when(exerciceServiceMock.updateExercice(any(Exercice.class))).thenReturn(false);
+        when(exerciceServiceMock.updateExercice(any(Exercise.class))).thenReturn(false);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
         
-        ResponseEntity<Exercice> errorResponse = exerciceController.updateExercice(new Exercice());
+        ResponseEntity<Exercise> errorResponse = exerciceController.updateExercice(new Exercise());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, errorResponse.getStatusCode());
     }
 }

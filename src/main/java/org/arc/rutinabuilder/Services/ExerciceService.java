@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.result.DeleteResult;
 import org.arc.rutinabuilder.Entity.Counter;
-import org.arc.rutinabuilder.Entity.Exercice;
+import org.arc.rutinabuilder.Entity.Exercise;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -37,7 +37,7 @@ public class ExerciceService {
      * @param exercice The Exercice object to be saved.
      * @return The saved Exercice object.
      */
-    public boolean saveExercice(Exercice exercice) {
+    public Boolean saveExercice(Exercise exercice) {
         if (exercice.getId() == null) {
             exercice.setId(getNextIdForNewObject());
         }
@@ -58,6 +58,7 @@ public class ExerciceService {
             return false;
         }
     }
+
 
     /**
      * Gets the next ID for a new Exercice object.
@@ -86,7 +87,7 @@ public class ExerciceService {
      * @param exercice the object to update
      * @return the object updated
      */
-    public boolean updateExercice(Exercice exercice) {
+    public boolean updateExercice(Exercise exercice) {
         try {
             saveExercice(exercice);
             return true; // Actualización exitosa
@@ -102,10 +103,37 @@ public class ExerciceService {
      * @param collectionName where the object is
      * @return an exercice Object
      */
-    public Exercice findOneById(Long id, String collectionName) {
+    public Exercise findOneById(Long id, String collectionName) {
         Query query = new Query(Criteria.where("id").is(id));
         try {
-            return mongoTemplate.findOne(query, Exercice.class, collectionName);
+            return mongoTemplate.findOne(query, Exercise.class, collectionName);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Find the least performed Exercise form a collection.
+     * @param collectionName where to find the Exercise.
+     * @return an Exercise.
+     */
+    public Exercise findLeastPerformedExercise(String collectionName){
+        Query query = new Query().with(Sort.by(Sort.Order.desc("date"))).limit(1);
+        return mongoTemplate.findOne(query, Exercise.class, collectionName);
+    }
+
+    /**
+     * Find an Exercice from the DB, based on its name and collection.
+     *
+     * @param name           of the Exercice to find.
+     * @param collectionName where the exercice is.
+     * @return an Exercice.
+     */
+    public Exercise findOneByName(String name, String collectionName) {
+        Query query = new Query(Criteria.where("name").is(name));
+        try {
+            return mongoTemplate.findOne(query, Exercise.class, collectionName);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return null;
@@ -122,7 +150,7 @@ public class ExerciceService {
     public boolean deleteExercice(long id, String CollectionName) {
         Query query = new Query(Criteria.where("id").is(id));
         try {
-            DeleteResult result = mongoTemplate.remove(query, Exercice.class, CollectionName);
+            DeleteResult result = mongoTemplate.remove(query, Exercise.class, CollectionName);
             return result.wasAcknowledged();
         } catch (Exception ex) {
             return false;
@@ -138,7 +166,7 @@ public class ExerciceService {
     public boolean deleteAllExerciceDone(String name, String CollectionName) {
         Query query = new Query(Criteria.where("name").is(name));
         try {
-            DeleteResult result = mongoTemplate.remove(query, Exercice.class, CollectionName);
+            DeleteResult result = mongoTemplate.remove(query, Exercise.class, CollectionName);
             return result.wasAcknowledged();
         } catch (Exception ex) {
             return false;
@@ -160,8 +188,8 @@ public class ExerciceService {
      * @param collectionName the name of the collection.
      * @return a list of Exercice.
      */
-    public List<Exercice> getAllExerciceOfOneType(String collectionName) {
-        return mongoTemplate.findAll(Exercice.class, collectionName);
+    public List<Exercise> getAllExerciceOfOneType(String collectionName) {
+        return mongoTemplate.findAll(Exercise.class, collectionName);
     }
 
     /**
@@ -171,10 +199,10 @@ public class ExerciceService {
      * @param collectionName the name of the collection where to look at.
      * @return a list of Exercice.
      */
-    public List<Exercice> getAllExercicesDoneOfOneType(String exerciceName, String collectionName) {
+    public List<Exercise> getAllExercicesDoneOfOneType(String exerciceName, String collectionName) {
         Query query = new Query(Criteria.where("name").is(exerciceName));
         query.with(Sort.by(Sort.Order.asc("date")));
-        return mongoTemplate.find(query, Exercice.class, collectionName);
+        return mongoTemplate.find(query, Exercise.class, collectionName);
     }
 
     /**

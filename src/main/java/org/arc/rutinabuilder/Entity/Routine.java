@@ -6,20 +6,20 @@ import java.util.ArrayList;
 
 @Document
 public class Routine {
-    private ArrayList<Exercice> Exercices;
+    private ArrayList<Exercise> Exercices;
 
     public Routine() {
     }
 
-    public Routine(ArrayList<Exercice> exercices) {
+    public Routine(ArrayList<Exercise> exercices) {
         Exercices = exercices;
     }
 
-    public ArrayList<Exercice> getExercices() {
+    public ArrayList<Exercise> getExercices() {
         return Exercices;
     }
 
-    public void setExercices(ArrayList<Exercice> exercices) {
+    public void setExercices(ArrayList<Exercise> exercices) {
         Exercices = exercices;
     }
 }
