@@ -1,20 +1,21 @@
-package org.arc.rutinabuilder.Manager;
+package org.arc.rutinabuilder.Services;
 
 import org.arc.rutinabuilder.Entity.Exercise;
 import org.arc.rutinabuilder.Entity.Routine;
-import org.arc.rutinabuilder.Services.ExerciceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- * The RoutineMaker class facilitates the creation of workout routines by assigning exercises to specific muscle group collections.
+ * The RoutineService class facilitates the creation of workout routines by assigning exercises to specific muscle group collections.
  * It ensures that exercises with empty or missing collections are assigned based on a predefined list of collection names.
  * Additionally, it maintains a mapping of the least recently performed exercises for each muscle group guide collection.
  */
-public class RoutineMaker {
+@Service
+public class RoutineService {
 
     @Autowired
     ExerciceService exerciceService;
@@ -23,7 +24,7 @@ public class RoutineMaker {
     private List<String> listCollectionName = new ArrayList<>();
     private final HashMap<String, Exercise> mapNameCollection = new HashMap<String, Exercise>();
 
-    public RoutineMaker() {
+    public RoutineService() {
     }
 
     /**

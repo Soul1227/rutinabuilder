@@ -23,65 +23,48 @@ public class ExerciceController {
     /**
      * Saves an Exercice object received in the request body.
      *
-     * @param exercice The Exercice object to be saved.
+     * @param exercise The Exercice object to be saved.
      * @return The saved Exercice object.
      */
-    @PostMapping("/exercice")
-    public ResponseEntity<Exercise> saveExercice(@RequestBody Exercise exercice) {
-        if (exerciceService.saveExercice(exercice)) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(exercice);
-        } else {
+    @PostMapping("/exercise")
+    public ResponseEntity<Exercise> saveExercice(@RequestBody Exercise exercise) {
+        try {
+            if(exercise==null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            if (exerciceService.saveExercice(exercise) != null) {
+                return ResponseEntity.status(HttpStatus.CREATED).body(exercise);
+            }else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+        } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    /**
-    @PostMapping("/exercice")
-    public ResponseEntity saveExercice(@RequestBody Exercise exercice) {
-        try {
-            if(exercice == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); //No es un ejercicio
 
-            exercice.setId(getNextIdForNewObject());
-
-            if (exercice.getDone()) {
-                exercice.setCollection(exercice.getCollection() + "_done");
-            } else {
-                exercice.setCollection(exercice.getCollection() + "_guide");
-            }
-
-            Exercise newExercise = mongoTemplate.save(exercice, exercice.getCollection());
-            if (newExercise == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); //Error al guardar el ejercicio
-
-            return ResponseEntity.status(HttpStatus.OK).body(exercice);
-
-        }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()); // e.message (mensaje de la excepcion)
-        }
-    }
-*/
     /**
      * Updates an Exercice Object received in the request body.
      *
      * @param exercice The Exercice object to be updated.
      * @return The Exercice object updated.
      */
-    @PutMapping("/exercice")
+    @PutMapping("/exercise")
     public ResponseEntity<Exercise> updateExercice(@RequestBody Exercise exercice) {
-        if (exerciceService.updateExercice(exercice)) {
-            return ResponseEntity.status(HttpStatus.OK).body(exercice);
+        Exercise exercise = exerciceService.updateExercice(exercice);
+        if (exercise!=null) {
+            return ResponseEntity.status(HttpStatus.OK).body(exercise);
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     /**
-     * Deletes an Exercice and all the Exercices done with the same name.
+     * Deletes an Exercise and all the Exercices done with the same name.
      *
-     * @param exercice The Exercice object to be deleted.
+     * @param exercise The Exercise object to be deleted.
      * @return
      */
     @DeleteMapping("/exercice")
-    public ResponseEntity<Exercise> deleteExercice(@RequestBody Exercise exercice) {
-        if (exerciceService.deleteExercice(exercice.getId(), exercice.getCollection()) && exerciceService.deleteAllExerciceDone(exercice.getName(), exercice.getCollection())) {
+    public ResponseEntity<Exercise> deleteExercise(@RequestBody Exercise exercise) {
+        if (exerciceService.deleteExercice(exercise.getId(), exercise.getCollection()) && exerciceService.deleteAllExerciceDone(exercise.getName(), exercise.getCollection())) {
             return ResponseEntity.status(HttpStatus.OK).build();
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -124,10 +107,4 @@ public class ExerciceController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-/**
-n @GetMapping("/routine") public ResponseEntity<List<Documet>> createRoutine(@RequestBody int numberOfWeeks, int numberOfDaysPerWeek, int numberOfExercisesPerDay){
-
-
- }
- */
 }
