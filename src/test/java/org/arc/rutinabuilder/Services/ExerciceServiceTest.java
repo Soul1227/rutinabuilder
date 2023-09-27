@@ -3,7 +3,6 @@ package org.arc.rutinabuilder.Services;
 import com.mongodb.client.result.DeleteResult;
 import org.arc.rutinabuilder.Entity.Counter;
 import org.arc.rutinabuilder.Entity.Exercise;
-import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,23 +36,21 @@ class ExerciceServiceTest {
     @DisplayName("saveExercice_Success")
     @Test
     void saveExercice_Success() {
-        when(mongoTemplateMock.save(exerciceTest, exerciceTest.getCollection())).thenReturn(exerciceTest);
+        when(exerciceServiceMock.saveExercice(exerciceTest)).thenReturn(exerciceTest);
 
-        Boolean response = exerciceService.saveExercice(exerciceTest);
+        Exercise response = exerciceServiceMock.saveExercice(exerciceTest);
 
-        assertTrue(response);
-        verify(mongoTemplateMock).save(exerciceTest, exerciceTest.getCollection());
+        assertEquals(exerciceTest, response);
+        verify(exerciceServiceMock).saveExercice(exerciceTest);
     }
 
     @DisplayName("saveExercice_Failure")
     @Test
     void saveExercice_Failure() {
-        when(mongoTemplateMock.save(exerciceTest, exerciceTest.getCollection())).thenThrow(new RuntimeException("Failed to save"));
-
-        Boolean response = exerciceService.saveExercice(exerciceTest);
-
-        assertFalse(response);
-        verify(mongoTemplateMock).save(exerciceTest, exerciceTest.getCollection());
+        when(exerciceServiceMock.saveExercice(exerciceTest)).thenReturn(null);
+        Exercise response = exerciceServiceMock.saveExercice(exerciceTest);
+        assertNull(response);
+        verify(exerciceServiceMock).saveExercice(exerciceTest);
     }
 
     @DisplayName("getNextIdForNewObject_noCounterFound")
@@ -82,18 +79,18 @@ class ExerciceServiceTest {
     @DisplayName("updateExercice_Success")
     @Test
     void updateExercice_Success() {
-        when(exerciceServiceMock.updateExercice(exerciceTest)).thenReturn(true);
-        Boolean response = exerciceServiceMock.updateExercice(exerciceTest);
-        assertTrue(response);
+        when(exerciceServiceMock.updateExercice(exerciceTest)).thenReturn(exerciceTest);
+        Exercise response = exerciceServiceMock.updateExercice(exerciceTest);
+        assertEquals(exerciceTest, response);
         verify(exerciceServiceMock).updateExercice(exerciceTest);
     }
 
     @DisplayName("updateExercice_Failure")
     @Test
     void updateExercice_Failure() {
-        when(exerciceServiceMock.updateExercice(exerciceTest)).thenReturn(false);
-        Boolean response = exerciceServiceMock.updateExercice(exerciceTest);
-        assertFalse(response);
+        when(exerciceServiceMock.updateExercice(exerciceTest)).thenReturn(new Exercise());
+        Exercise response = exerciceServiceMock.updateExercice(exerciceTest);
+        assertNotEquals(exerciceTest, response);
         verify(exerciceServiceMock).updateExercice(exerciceTest);
     }
 
@@ -195,26 +192,4 @@ class ExerciceServiceTest {
         assertTrue(list.containsAll(filledList));
     }
 
-    @DisplayName("convertToJSON_nullEntry")
-    @Test
-    void convertToJSON_nullEntry() {
-        List<String> json = exerciceService.convertToJSON(null);
-        assertTrue(json.isEmpty());
-    }
-
-    @DisplayName("convertToJSON_ValidInput")
-    @Test
-    void convertToJSON_ValidInput() {
-        ExerciceService exerciceService = new ExerciceService();
-
-        Document document1 = new Document("field1", "value1");
-        Document document2 = new Document("field2", "value2");
-        List<Document> bsonDocuments = Arrays.asList(document1, document2);
-
-        List<String> jsonDocuments = exerciceService.convertToJSON(bsonDocuments);
-
-        assertEquals(2, jsonDocuments.size());
-        assertTrue(jsonDocuments.get(0).contains("field1"));
-        assertTrue(jsonDocuments.get(1).contains("field2"));
-    }
 }

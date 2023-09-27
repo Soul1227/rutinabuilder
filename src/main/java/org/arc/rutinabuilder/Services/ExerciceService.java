@@ -1,11 +1,9 @@
 package org.arc.rutinabuilder.Services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import org.arc.rutinabuilder.Entity.Counter;
 import org.arc.rutinabuilder.Entity.Exercise;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -14,7 +12,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -34,31 +31,29 @@ public class ExerciceService {
     /**
      * Saves an Exercice object into the specified collection.
      *
-     * @param exercice The Exercice object to be saved.
+     * @param exercise The Exercice object to be saved.
      * @return The saved Exercice object.
      */
-    public Boolean saveExercice(Exercise exercice) {
-        if (exercice.getId() == null) {
-            exercice.setId(getNextIdForNewObject());
+    public Exercise saveExercice(Exercise exercise) {
+        if (exercise.getId() == null) {
+            exercise.setId(getNextIdForNewObject());
         }
         /*
-          If the exercice come with the param "done" as true, "_done" is added to his collection name.
+          If the exercise come with the param "done" as true, "_done" is added to his collection name.
           so it will be saved in a different collection.
          */
-        if (exercice.getDone()) {
-            exercice.setCollection(exercice.getCollection() + "_done");
+        if (exercise.getDone()) {
+            exercise.setCollection(exercise.getCollection() + "_done");
         } else {
-            exercice.setCollection(exercice.getCollection() + "_guide");
+            exercise.setCollection(exercise.getCollection() + "_guide");
         }
         try {
-            mongoTemplate.save(exercice, exercice.getCollection());
-            return true;
+            return mongoTemplate.save(exercise, exercise.getCollection());
         } catch (Exception e) {
             //Añadir Log
-            return false;
+            return null;
         }
     }
-
 
     /**
      * Gets the next ID for a new Exercice object.
@@ -72,7 +67,7 @@ public class ExerciceService {
 
         if (counter == null) {
             counter = new Counter();
-            counter.setNextId(1); // // Initial value for nextId
+            counter.setNextId(1); // Initial value for nextId
             mongoTemplate.save(counter, collectionName);
         } else {
             Update update = new Update().inc("nextId", 1);
@@ -87,12 +82,24 @@ public class ExerciceService {
      * @param exercice the object to update
      * @return the object updated
      */
-    public boolean updateExercice(Exercise exercice) {
+    public Exercise updateExercice(Exercise exercice) {
         try {
-            saveExercice(exercice);
-            return true; // Actualización exitosa
+            Query query = new Query(Criteria.where("id").is(exercice.getId()));
+            Update update = new Update()
+                    .set("name", exercice.getName())
+                    .set("rep", exercice.getRep())
+                    .set("set", exercice.getSet())
+                    .set("time", exercice.getTime())
+                    .set("description", exercice.getDescription())
+                    .set("date", exercice.getDate())
+                    .set("done", exercice.getDone())
+                    .set("weight", exercice.getWeight())
+                    .set("collection", exercice.getCollection());
+            UpdateResult result = mongoTemplate.updateFirst(query, update, exercice.getCollection());
+            if (result.wasAcknowledged()) return findOneById(exercice.getId(), exercice.getCollection());
+            return null;
         } catch (Exception e) {
-            return false; // Error en la actualización
+            return null; // Error en la actualización
         }
     }
 
@@ -115,10 +122,11 @@ public class ExerciceService {
 
     /**
      * Find the least performed Exercise form a collection.
+     *
      * @param collectionName where to find the Exercise.
      * @return an Exercise.
      */
-    public Exercise findLeastPerformedExercise(String collectionName){
+    public Exercise findLeastPerformedExercise(String collectionName) {
         Query query = new Query().with(Sort.by(Sort.Order.desc("date"))).limit(1);
         return mongoTemplate.findOne(query, Exercise.class, collectionName);
     }
@@ -203,30 +211,5 @@ public class ExerciceService {
         Query query = new Query(Criteria.where("name").is(exerciceName));
         query.with(Sort.by(Sort.Order.asc("date")));
         return mongoTemplate.find(query, Exercise.class, collectionName);
-    }
-
-    /**
-     * Converts a list of BSON documents to JSON objects.
-     *
-     * @param bsonDocuments a list of BSON documents
-     * @return a list of documents in JSON format
-     */
-    public List<String> convertToJSON(List<Document> bsonDocuments) {
-        List<String> jsonDocuments = new ArrayList<>();
-        if (bsonDocuments == null) {
-            return jsonDocuments;
-        }
-        // Convierte cada documento BSON a JSON utilizando Jackson ObjectMapper
-        ObjectMapper objectMapper = new ObjectMapper();
-        for (Document doc : bsonDocuments) {
-            try {
-                String jsonDocument = objectMapper.writeValueAsString(doc);
-                jsonDocuments.add(jsonDocument);
-            } catch (JsonProcessingException e) {
-                // Manejo de errores en caso de que ocurra una excepción al convertir a JSON
-                e.printStackTrace();
-            }
-        }
-        return jsonDocuments;
     }
 }

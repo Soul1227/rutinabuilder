@@ -22,7 +22,8 @@ class ExerciceControllerTest {
     @DisplayName("Post: Creating new Exercice")
     @Test
     void testSaveExercice_Created() {
-        when(exerciceServiceMock.saveExercice(any(Exercise.class))).thenReturn(true);
+        Exercise e = new Exercise();
+        when(exerciceServiceMock.saveExercice(any(Exercise.class))).thenReturn(e);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
         ResponseEntity<Exercise> response = exerciceController.saveExercice(new Exercise());
@@ -32,17 +33,17 @@ class ExerciceControllerTest {
     @DisplayName("Post: Creating new Exercice")
     @Test
     void testSaveExercice_Error() {
-        when(exerciceServiceMock.saveExercice(any(Exercise.class))).thenReturn(false);
+        when(exerciceServiceMock.saveExercice(any(Exercise.class))).thenReturn(null);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
         ResponseEntity<Exercise> errorResponse = exerciceController.saveExercice(new Exercise());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, errorResponse.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
     }
 
     @DisplayName("Put: Updating Exercice")
     @Test
     void testUpdateExercice_OK() {
-        when(exerciceServiceMock.updateExercice(any(Exercise.class))).thenReturn(true);
+        when(exerciceServiceMock.updateExercice(any(Exercise.class))).thenReturn(new Exercise());
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
         ResponseEntity<Exercise> expectedResponse = exerciceController.updateExercice(new Exercise());
@@ -53,7 +54,7 @@ class ExerciceControllerTest {
     @DisplayName("Put: Updating Exercice")
     @Test
     void testUpdateExercice_Error() {
-        when(exerciceServiceMock.updateExercice(any(Exercise.class))).thenReturn(false);
+        when(exerciceServiceMock.updateExercice(any(Exercise.class))).thenReturn(null);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
         
         ResponseEntity<Exercise> errorResponse = exerciceController.updateExercice(new Exercise());
