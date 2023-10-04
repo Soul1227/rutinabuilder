@@ -62,8 +62,7 @@ public class ExerciceService {
      */
     public long getNextIdForNewObject() {
         String collectionName = "counter";
-        Query query = new Query();
-        Counter counter = mongoTemplate.findOne(query, Counter.class, collectionName);
+        Counter counter = mongoTemplate.findOne(new Query(), Counter.class, collectionName);
 
         if (counter == null) {
             counter = new Counter();
@@ -71,7 +70,7 @@ public class ExerciceService {
             mongoTemplate.save(counter, collectionName);
         } else {
             Update update = new Update().inc("nextId", 1);
-            mongoTemplate.upsert(query, update, collectionName);
+            mongoTemplate.upsert(new Query(), update, collectionName);
         }
         return counter.getNextId();
     }

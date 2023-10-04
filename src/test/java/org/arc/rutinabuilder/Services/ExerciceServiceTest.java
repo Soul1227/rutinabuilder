@@ -3,10 +3,13 @@ package org.arc.rutinabuilder.Services;
 import com.mongodb.client.result.DeleteResult;
 import org.arc.rutinabuilder.Entity.Counter;
 import org.arc.rutinabuilder.Entity.Exercise;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -19,48 +22,82 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ExerciceServiceTest {
-    Exercise exerciceTest = new Exercise(4L, "test", 50, 3, null, "test", Date.valueOf(LocalDate.now()), true, 50, "test");
-    MongoTemplate mongoTemplateMock = mock(MongoTemplate.class);
-    ExerciceService exerciceService = new ExerciceService(mongoTemplateMock);
-    ExerciceService exerciceServiceMock = mock(ExerciceService.class);
+
+    Exercise exerciceTest;
+    Exercise exerciseUpdate;
+    MongoTemplate mongoTemplateMock;
+    ExerciceService exerciceService;
+    ExerciceService exerciceServiceMock;
 
     @BeforeEach
     void setUp() {
-
+        exerciceTest = new Exercise(4L, "test", 50, 3, null, "test", Date.valueOf(LocalDate.now()), true, 50, "test");
+        exerciseUpdate = new Exercise(4L, "test", 60, 3, null, "test", Date.valueOf(LocalDate.now()), true, 80, "test");
+        mongoTemplateMock = mock(MongoTemplate.class);
+        exerciceService = new ExerciceService(mongoTemplateMock);
+        exerciceServiceMock = mock(ExerciceService.class);
     }
 
     @AfterEach
     void tearDown() {
     }
 
+    /**
+     * SaveExercice
+     */
     @DisplayName("saveExercice_Success")
     @Test
     void saveExercice_Success() {
-        when(exerciceServiceMock.saveExercice(exerciceTest)).thenReturn(exerciceTest);
+        when(mongoTemplateMock.save(eq(exerciceTest), any(String.class))).thenReturn(exerciceTest);
+        Exercise savedExercise = exerciceService.saveExercice(exerciceTest);
 
-        Exercise response = exerciceServiceMock.saveExercice(exerciceTest);
+        // Assert
+        assertNotNull(savedExercise);
+        assertEquals(exerciceTest, savedExercise);
 
-        assertEquals(exerciceTest, response);
-        verify(exerciceServiceMock).saveExercice(exerciceTest);
+        // Verificar que mongoTemplateMock.save se llamó con los argumentos correctos
+        ArgumentCaptor<Exercise> exerciseCaptor = ArgumentCaptor.forClass(Exercise.class);
+        ArgumentCaptor<String> collectionCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(mongoTemplateMock).save(exerciseCaptor.capture(), collectionCaptor.capture());
+
+        assertEquals(exerciceTest, exerciseCaptor.getValue());
+        assertEquals("test_done", collectionCaptor.getValue()); // Asegúrate de que la colección sea la esperada
     }
 
     @DisplayName("saveExercice_Failure")
     @Test
     void saveExercice_Failure() {
-        when(exerciceServiceMock.saveExercice(exerciceTest)).thenReturn(null);
-        Exercise response = exerciceServiceMock.saveExercice(exerciceTest);
-        assertNull(response);
-        verify(exerciceServiceMock).saveExercice(exerciceTest);
+        when(mongoTemplateMock.save(eq(exerciceTest), any(String.class))).thenReturn(null);
+        Exercise failedExercise = exerciceService.saveExercice(exerciceTest);
+
+        //Assert
+        assertNull(failedExercise);
+
+        ArgumentCaptor<Exercise> exerciseCaptor = ArgumentCaptor.forClass(Exercise.class);
+        ArgumentCaptor<String> collectionCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(mongoTemplateMock).save(exerciseCaptor.capture(), collectionCaptor.capture());
+
+        assertEquals(exerciceTest, exerciseCaptor.getValue());
+        assertEquals("test_done", collectionCaptor.getValue()); // Asegúrate de que la colección sea la esperada
     }
 
+    /**
+     * GetNextIdForNewObject
+     */
     @DisplayName("getNextIdForNewObject_noCounterFound")
     @Test
     void getNextIdForNewObject_noCounterFound() {
         String collectionName = "counter";
         Query query = new Query();
         when(mongoTemplateMock.findOne(query, Counter.class, collectionName)).thenReturn(null);
-
+        /*Al no encontrarse un objeto counter, el método genera uno nuevo con valor 1
+         por eso el valor esperado es 1.
+         */
         Long counterId = exerciceService.getNextIdForNewObject();
+        System.out.println("Respuesta obtenida: " + counterId);
+        System.out.println("Respuesta esperada: " + 1L);
         assertEquals(1L, counterId);
     }
 
@@ -73,35 +110,38 @@ class ExerciceServiceTest {
         when(mongoTemplateMock.findOne(query, Counter.class, collectionName)).thenReturn(counter);
 
         Long counterId = exerciceService.getNextIdForNewObject();
-        assertEquals(5L, counterId);
+        System.out.println("Respuesta obtenida: " + counterId);
+        System.out.println("Respuesta esperada: " + counter.getNextId());
+        assertEquals(counter.getNextId(), counterId);
     }
 
+    /**
+     * UpdateExercice
+     */
     @DisplayName("updateExercice_Success")
     @Test
     void updateExercice_Success() {
-        when(exerciceServiceMock.updateExercice(exerciceTest)).thenReturn(exerciceTest);
-        Exercise response = exerciceServiceMock.updateExercice(exerciceTest);
-        assertEquals(exerciceTest, response);
-        verify(exerciceServiceMock).updateExercice(exerciceTest);
+
     }
+
 
     @DisplayName("updateExercice_Failure")
     @Test
     void updateExercice_Failure() {
-        when(exerciceServiceMock.updateExercice(exerciceTest)).thenReturn(new Exercise());
-        Exercise response = exerciceServiceMock.updateExercice(exerciceTest);
-        assertNotEquals(exerciceTest, response);
-        verify(exerciceServiceMock).updateExercice(exerciceTest);
     }
 
+    /**
+     * FindOneById
+     */
     @DisplayName("findOneById_Success")
     @Test
     void findOneById_Success() {
         Query query = new Query(Criteria.where("id").is(exerciceTest.getId()));
         when(mongoTemplateMock.findOne(query, Exercise.class, exerciceTest.getCollection())).thenReturn(exerciceTest);
-
         Exercise exercice = exerciceService.findOneById(exerciceTest.getId(), exerciceTest.getCollection());
-
+        System.out.println("respuesta obtenida: " + exercice);
+        System.out.println("respuesta esperada: " + exerciceTest);
+        assertNotNull(exercice);
         assertEquals(exerciceTest, exercice);
     }
 
@@ -109,13 +149,17 @@ class ExerciceServiceTest {
     @Test
     void findOneById_Failure() {
         Query query = new Query(Criteria.where("id").is(exerciceTest.getId()));
-        when(mongoTemplateMock.find(query, Exercise.class, exerciceTest.getCollection())).thenReturn(null);
-
+        when(mongoTemplateMock.findOne(query, Exercise.class, exerciceTest.getCollection())).thenReturn(null);
         Exercise exercice = exerciceService.findOneById(exerciceTest.getId(), exerciceTest.getCollection());
-
+        System.out.println("respuesta obtenida: " + exercice);
+        System.out.println("respuesta esperada: " + null);
         assertNull(exercice);
+        verify(mongoTemplateMock).findOne(query,Exercise.class,exerciceTest.getCollection());
     }
 
+    /**
+     * DeleteExercice
+     */
     @DisplayName("deleteExercice_Success")
     @Test
     void deleteExercice_Success() {
@@ -132,7 +176,7 @@ class ExerciceServiceTest {
             }
         });
 
-        Boolean result = exerciceService.deleteExercice(exerciceTest.getId(), exerciceTest.getCollection());
+        boolean result = exerciceService.deleteExercice(exerciceTest.getId(), exerciceTest.getCollection());
         assertTrue(result);
         verify(mongoTemplateMock).remove(query, Exercise.class, exerciceTest.getCollection());
     }
@@ -158,6 +202,9 @@ class ExerciceServiceTest {
         verify(mongoTemplateMock).remove(query, Exercise.class, exerciceTest.getCollection());
     }
 
+    /**
+     * GetAllCollectionNames
+     */
     @DisplayName("getAllCollectionNames")
     @Test
     void getAllCollectionNames() {
@@ -167,17 +214,22 @@ class ExerciceServiceTest {
         assertTrue(actualCollectionNames.containsAll(expectedCollectionNames));
     }
 
+    /**
+     * GetAllExerciceDocuments
+     */
     @DisplayName("getAllExerciceDocuments_EmptyList")
     @Test
     void getAllExerciceDocuments_empty() {
         List<Exercise> emptyList = new ArrayList<>();
-        when(exerciceServiceMock.getAllExerciceOfOneType("legs")).thenReturn(emptyList);
+        String collectionName = "legs";
+        when(mongoTemplateMock.findAll(Exercise.class,collectionName)).thenReturn(emptyList);
 
-        List<Exercise> list = exerciceServiceMock.getAllExerciceOfOneType("legs");
+        List<Exercise> list = exerciceService.getAllExerciceOfOneType("legs");
         assertTrue(list.isEmpty());
+        verify(mongoTemplateMock).findAll(Exercise.class,collectionName);
     }
 
-    @DisplayName("getAllExerciceDocuments_EmptyList")
+    @DisplayName("getAllExerciceDocuments_FilledList")
     @Test
     void getAllExerciceDocuments_filled() {
         Exercise document1 = new Exercise();

@@ -27,7 +27,7 @@ public class ExerciceController {
      * @return The saved Exercice object.
      */
     @PostMapping("/exercise")
-    public ResponseEntity<Exercise> saveExercice(@RequestBody Exercise exercise) {
+    public ResponseEntity<Exercise> saveExercise(@RequestBody Exercise exercise) {
         try {
             if(exercise==null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             if (exerciceService.saveExercice(exercise) != null) {
