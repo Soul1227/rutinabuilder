@@ -26,7 +26,7 @@ class ExerciceControllerTest {
         when(exerciceServiceMock.saveExercice(any(Exercise.class))).thenReturn(e);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
-        ResponseEntity<Exercise> response = exerciceController.saveExercice(new Exercise());
+        ResponseEntity<Exercise> response = exerciceController.saveExercise(new Exercise());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
@@ -36,7 +36,7 @@ class ExerciceControllerTest {
         when(exerciceServiceMock.saveExercice(any(Exercise.class))).thenReturn(null);
         ExerciceController exerciceController = new ExerciceController(exerciceServiceMock);
 
-        ResponseEntity<Exercise> errorResponse = exerciceController.saveExercice(new Exercise());
+        ResponseEntity<Exercise> errorResponse = exerciceController.saveExercise(new Exercise());
         assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
     }
 
