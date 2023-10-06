@@ -27,6 +27,10 @@ public class RoutineService {
     public RoutineService() {
     }
 
+    public RoutineService(ExerciceService exerciceService) {
+        this.exerciceService = exerciceService;
+    }
+
     /**
      * Creates a workout routine by preparing the necessary data, assigning collections to exercises, and filling
      * exercises with updated information.
@@ -105,7 +109,7 @@ public class RoutineService {
 
     public void setListCollectionNameBanned(Routine routine) {
         for (int index = 0; index < routine.getExercices().size(); index++) {
-            if (!listCollectionNameBanned.contains(routine.getExercices().get(index).getCollection()) && !routine.getExercices().get(index).getCollection().isEmpty())
+            if (!listCollectionNameBanned.contains(routine.getExercices().get(index).getCollection()) && routine.getExercices().get(index).getCollection()!=null)
                 listCollectionNameBanned.add(routine.getExercices().get(index).getCollection());
         }
     }
