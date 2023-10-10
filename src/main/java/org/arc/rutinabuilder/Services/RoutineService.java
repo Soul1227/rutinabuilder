@@ -27,6 +27,10 @@ public class RoutineService {
     public RoutineService() {
     }
 
+    public RoutineService(ExerciceService exerciceService) {
+        this.exerciceService = exerciceService;
+    }
+
     /**
      * Creates a workout routine by preparing the necessary data, assigning collections to exercises, and filling
      * exercises with updated information.
@@ -46,9 +50,10 @@ public class RoutineService {
      *
      * @param routine The routine containing exercises with assigned collections.
      */
-    private void FillExercises(Routine routine) {
+    public void FillExercises(Routine routine) {
         for (Exercise exercice : routine.getExercices()) {
-            exercice = mapNameCollection.get(exercice.getCollection());
+            Exercise exerciceMap = mapNameCollection.get(exercice.getCollection());
+            copyExerciseValues(exercice,exerciceMap);
             exercice.setId(null);
             exercice.setDone(false);
         }
@@ -60,7 +65,7 @@ public class RoutineService {
      * @param routine            The routine containing exercises to be assigned collections.
      * @param listCollectionName A list of collection names to use for assignment.
      */
-    private void AssignCollection(Routine routine, List<String> listCollectionName) {
+    public void AssignCollection(Routine routine, List<String> listCollectionName) {
         int collectionIndex = 0;
         for (Exercise exercise : routine.getExercices()) {
             if (exercise.getCollection() == null || exercise.getCollection().isEmpty()) {
@@ -76,11 +81,17 @@ public class RoutineService {
      *
      * @param routine The input routine for which data is being prepared.
      */
-    private void PreparingList(Routine routine) {
+    public void PreparingList(Routine routine) {
         setListCollectionNameBanned(routine);
         setListCollectionName(exerciceService.getAllCollectionNames().stream().toList());
-        listCollectionName.forEach(listCollectionNameBanned::remove);
-        FillExerciseMap();
+        for (int i = 0; i < listCollectionName.size(); i++) {
+            String name = listCollectionName.get(i);
+            if (listCollectionNameBanned.contains(name)) {
+                listCollectionName.remove(i);
+                i--;
+            }
+        }
+        fillExerciseMap();
     }
 
     /**
@@ -88,7 +99,7 @@ public class RoutineService {
      *
      * @return A HashMap of Exercice objects, where each object represents the last performed exercise for a muscle group guide collection.
      */
-    public HashMap<String, Exercise> FillExerciseMap() {
+    public HashMap<String, Exercise> fillExerciseMap() {
         List<String> guideCollections = exerciceService.getAllCollectionNames().stream().filter(collectionName -> collectionName.contains("_guide")).toList();
         for (String collectionName : guideCollections) {
             Exercise exercice = exerciceService.findLeastPerformedExercise(collectionName);
@@ -99,13 +110,31 @@ public class RoutineService {
         return mapNameCollection;
     }
 
+    /**
+     * Copies values from one exercise to another, updating the target exercise.
+     *
+     * @param targetExercise The exercise to fill with values.
+     * @param sourceExercise The exercise from which to take values.
+     * @return The updated target exercise.
+     */
+    private Exercise copyExerciseValues(Exercise targetExercise, Exercise sourceExercise) {
+        targetExercise.setName(sourceExercise.getName());
+        targetExercise.setRep(sourceExercise.getRep());
+        targetExercise.setSet(sourceExercise.getSet());
+        targetExercise.setTime(sourceExercise.getTime());
+        targetExercise.setDescription(sourceExercise.getDescription());
+        targetExercise.setDate(sourceExercise.getDate());
+        targetExercise.setWeight(sourceExercise.getWeight());
+        return targetExercise;
+    }
+
     public List<String> getListCollectionNameBanned() {
         return listCollectionNameBanned;
     }
 
     public void setListCollectionNameBanned(Routine routine) {
         for (int index = 0; index < routine.getExercices().size(); index++) {
-            if (!listCollectionNameBanned.contains(routine.getExercices().get(index).getCollection()) && !routine.getExercices().get(index).getCollection().isEmpty())
+            if (!listCollectionNameBanned.contains(routine.getExercices().get(index).getCollection()) && routine.getExercices().get(index).getCollection() != null)
                 listCollectionNameBanned.add(routine.getExercices().get(index).getCollection());
         }
     }
@@ -115,6 +144,6 @@ public class RoutineService {
     }
 
     public void setListCollectionName(List<String> listCollectionName) {
-        this.listCollectionName = listCollectionName;
+        this.listCollectionName = new ArrayList<>(listCollectionName);
     }
 }
