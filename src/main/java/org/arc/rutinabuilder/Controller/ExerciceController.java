@@ -92,7 +92,7 @@ public class ExerciceController {
     /**
      * Retrieves the name of all collections in the Data Base.
      *
-     * @return A list of BSON documents representing the Exercices.
+     * @return A list of collectionNames.
      */
     @GetMapping("/collectionNames")
     public ResponseEntity<List<String>> getAllCollectionNames() {
