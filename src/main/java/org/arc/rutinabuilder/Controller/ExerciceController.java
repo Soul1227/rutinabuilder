@@ -7,8 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+import java.util.*;
 
 @RestController
 public class ExerciceController {
@@ -29,10 +28,10 @@ public class ExerciceController {
     @PostMapping("/exercise")
     public ResponseEntity<Exercise> saveExercise(@RequestBody Exercise exercise) {
         try {
-            if(exercise==null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            if (exercise == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             if (exerciceService.saveExercice(exercise) != null) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(exercise);
-            }else {
+            } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
         } catch (Exception ex) {
@@ -49,7 +48,7 @@ public class ExerciceController {
     @PutMapping("/exercise")
     public ResponseEntity<Exercise> updateExercice(@RequestBody Exercise exercice) {
         Exercise exercise = exerciceService.updateExercice(exercice);
-        if (exercise!=null) {
+        if (exercise != null) {
             return ResponseEntity.status(HttpStatus.OK).body(exercise);
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -91,18 +90,34 @@ public class ExerciceController {
     }
 
     /**
+     * Retrieves the name of all collections in the Data Base.
+     *
+     * @return A list of BSON documents representing the Exercices.
+     */
+    @GetMapping("/collectionNames")
+    public ResponseEntity<List<String>> getAllCollectionNames() {
+        try {
+            ArrayList<String> collectionNames = new ArrayList<>(exerciceService.getAllCollectionNames());
+            return ResponseEntity.status(HttpStatus.OK).body(collectionNames);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
      * Retrieves all Exercices performed by a specific name from a given collection.
      *
-     * @param exerciceName   The name of the Exercice to filter by.
+     * @param exerciseName   The name of the Exercice to filter by.
      * @param collectionName The name of the collection to search in.
      * @return A list of Exercices performed.
      */
     @GetMapping("/allExercicesDone")
-    public ResponseEntity<List<Exercise>> getAllExercicesDoneOfOneType(@RequestParam String collectionName, String exerciceName) {
+    public ResponseEntity<List<Exercise>> getAllExercicesDoneOfOneType(@RequestParam String collectionName, String exerciseName) {
         try {
-            if (collectionName.isEmpty() || exerciceName.isEmpty())
+            if (collectionName.isEmpty() || exerciseName.isEmpty())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            return ResponseEntity.status(HttpStatus.OK).body(exerciceService.getAllExercicesDoneOfOneType(exerciceName, collectionName));
+            return ResponseEntity.status(HttpStatus.OK).body(exerciceService.getAllExercicesDoneOfOneType(exerciseName, collectionName));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
